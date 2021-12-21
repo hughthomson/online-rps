@@ -6,6 +6,9 @@ const { Server } = require("socket.io");
 const io = new Server(server);
 const port = process.env.PORT || 3001
 var uuid = require('uuid')
+var favicon = require('serve-favicon');
+
+app.use(favicon(__dirname + '/assets/rock.png'));
 
 
 
@@ -13,10 +16,12 @@ app.get('/js/local.js', (req, res) => {
     res.sendFile(__dirname + '/js/local.js');
 })
 
-app.use("/static", express.static('./static/'));
-
-app.get('/js/online.js', (req, res) => {
+app.get('/online-game/js/online.js', (req, res) => {
     res.sendFile(__dirname + '/js/online.js');
+})
+
+app.get('/assets/rock.png', (req, res) => {
+    res.sendFile(__dirname + '/assets/rock.png');
 })
 
 app.get('/assets/bot.png', (req, res) => {
@@ -32,7 +37,7 @@ app.get('/local-game', (req, res) => {
     res.sendFile(__dirname + '/local.html')
 })
 
-app.get('/online-game', (req, res) => {
+app.get('/online-game/', (req, res) => {
     res.redirect('/online-game/' + uuid.v4())
     // res.sendFile(__dirname + '/online.html')
 })
