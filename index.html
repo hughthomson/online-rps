@@ -11,6 +11,10 @@
     <link rel="icon" type="image/png" href="assets/rock.png" />
     <style>
 
+* {
+            box-sizing: border-box
+        }
+
         .mainContainer {
             max-width: 970px;
             margin: auto;
@@ -35,6 +39,47 @@
         ul > li {
             padding-top: 0.5rem;
             padding-bottom: 0.5rem;
+        }
+
+
+        .col {
+            text-align: center;
+        }
+
+        .row {
+            margin-top: 20px;
+            align-items: center;
+        }
+        .lock-in-div {
+            width: 100%;
+        }
+
+        .lock-in {
+            width: 80%;
+        }
+
+        .card {
+            margin: 0 auto; /* Added */
+        float: none; /* Added */
+        margin-bottom: 10px; /* Added */
+        text-align: left;
+        }
+
+        .jumbotron {
+            background-color: rgb(236, 236, 236);
+            margin-top: 15px;
+            margin-bottom: 10px;
+            padding: 10px 20px 10px 20px;
+            border-radius: 10px;
+        }
+
+        button {
+            margin-top: 5px;
+            margin-bottom: 5px;
+        }
+
+        img {
+            width: 120px;
         }
     </style>
 </head>
@@ -61,6 +106,51 @@
                 </div>
             </div>
         </nav>
+
+        <main>
+            <div class="jumbotron">
+                <h1 class="display-4">Welcome to RPS Online!</h1>
+                <p class="lead">This is a simple version of the classic game Rock Paper Scissors (RPS)</p>
+                <hr class="my-4">
+                <p>Rock Paper Scissors is a hand game, usually played between two people, in which each player simultaneously forms one of three shapes with an outstretched hand. These shapes are "rock", "paper", and "scissors"</p>
+                <p class="lead">
+                    <a class="btn btn-primary btn-lg" href="https://en.wikipedia.org/wiki/Rock_paper_scissors"  target="_blank" rel="noopener noreferrer" role="button">Learn more</a>
+                </p>
+            </div>
+
+            <div class="row">
+                <div class="col">
+                    <div class="card">
+                        <div class="card-header">
+                          Local Game
+                        </div>
+                        <div class="card-body">
+                          <h5 class="card-title">Play a Game Against Our Bot</h5>
+                          <p class="card-text">Play a match against our bot backed by a random number generator.</p>
+                          <a href="/local-game" class="btn btn-primary">Play Match</a>
+                        </div>
+                      </div>
+                </div>
+                <div class="col">
+                    <div class="card">
+                        <div class="card-header">
+                          Online Game
+                        </div>
+                        <div class="card-body">
+                          <h5 class="card-title">Play Online Against a Friend</h5>
+                          <p class="card-text">Create a match and share the room link with a freind to play against them.</p>
+                          <a href="/online-game" class="btn btn-primary">Create Match</a>
+                        </div>
+                      </div>
+                </div>
+            </div>
+        </main>
+
+        <footer>
+			<p class="text-center text-muted">
+                <small>Copyright © 2021 Hugh Thomson</small>
+            </p>
+		</footer>
     </div>
     
     <!-- <script src="/js/home.js"></script> -->

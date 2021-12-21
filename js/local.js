@@ -56,7 +56,7 @@ function endRound(type) {
         roundTextElm.innerHTML = "Tie"
     }
 
-    setTimeout(function() {newRound()}, 3000);
+    setTimeout(function() {newRound()}, 2000);
 }
 
 function checkWin() {
@@ -98,9 +98,15 @@ function makeOpponentSelection() {
 
     checkWin()
 }
-  
 
 function makeSelection(selection) {
+    playerSelectionElm.innerHTML = "<h1>✔</h1>"
+
+    setTimeout(function() {realMakeSelection(selection)}, 500);
+}
+  
+
+function realMakeSelection(selection) {
     if(selection == 1) {
         playerSelectionElm.innerHTML = "<h3>Rock</h3>"
     } else if(selection == 2) {
