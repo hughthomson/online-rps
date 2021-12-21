@@ -55,26 +55,32 @@ io.on('connection', (socket) => {
         socket.join(room)
 
         if(!roomInfo.has(room)) {
-            roomInfo.set(room, {host: socket.id, guest: -1, hostSelection: -1, guestSelection: -1})
-            io.to(socket.id).emit('client role', 'host');
-            socket.broadcast.to(room).emit('connect to room', 'host');
+            roomInfo.set(room, {host: socket.id, guest: -1, hostSelection: -1, guestSelection: -1, round: 1, guestWins: 0, hostWins: 0})
+            io.to(socket.id).emit('client role', {role: "host", roomInfo: roomInfo.get(room)});
+            socket.to(room).emit('connect to room', {role: "host", roomInfo: roomInfo.get(room)});
         } else {
             if(roomInfo.get(room).host == -1) {
                 let tempObj = roomInfo.get(room)
                 tempObj.host = socket.id
                 roomInfo.set(room, tempObj)
-                io.to(socket.id).emit('client role', 'host');
-                socket.broadcast.to(room).emit("connect to room", "host");
+                io.to(socket.id).emit('client role', {role: "host", roomInfo: roomInfo.get(room)});
+                socket.to(room).emit("connect to room", {role: "host", roomInfo: roomInfo.get(room)});
             } else if(roomInfo.get(room).guest == -1) {
                 let tempObj = roomInfo.get(room)
                 tempObj.guest = socket.id
                 roomInfo.set(room, tempObj)
-                io.to(socket.id).emit('client role', 'guest');
-                socket.broadcast.to(room).emit("connect to room", "guest");
+                io.to(socket.id).emit('client role', {role: "guest", roomInfo: roomInfo.get(room)});
+                socket.to(room).emit("connect to room", {role: "guest", roomInfo: roomInfo.get(room)});
             } else {
-                io.to(socket.id).emit('client role', 'spectator');
-                socket.broadcast.to(room).emit("connect to room", "spectator");
+                io.to(socket.id).emit('client role', {role: "spectator", roomInfo: roomInfo.get(room)});
+                socket.to(room).emit("connect to room", {role: "spectator", roomInfo: roomInfo.get(room)});
             }
+        }
+
+        if(roomInfo.get(room).host != -1 && roomInfo.get(room).guest != -1) {
+            io.in(room).emit("room connected", "true");
+        } else {
+            io.in(room).emit("room connected", "false");
         }
     })
 
@@ -103,10 +109,13 @@ io.on('connection', (socket) => {
 
     })
 
-    socket.on('reset round', () => {
+    socket.on('set round', (data) => {
         let tempObj = roomInfo.get(roomID)
         tempObj.hostSelection = -1
         tempObj.guestSelection = -1
+        tempObj.round = data.round
+        tempObj.hostWins = data.hostWins
+        tempObj.guestWins = data.guestWins
         roomInfo.set(roomID, tempObj)
     })
     
@@ -116,13 +125,20 @@ io.on('connection', (socket) => {
             if(roomInfo.get(roomID).host == socket.id) {
                 let tempObj = roomInfo.get(roomID)
                 tempObj.host = -1
+                tempObj.hostSelection = -1
+                tempObj.guestSelection = -1
                 roomInfo.set(roomID, tempObj)
                 io.to(roomID).emit("disconnected from room", "host");
+                io.in(roomID).emit("room connected", "false");
+
             } else if(roomInfo.get(roomID).guest == socket.id) {
                 let tempObj = roomInfo.get(roomID)
                 tempObj.guest = -1
+                tempObj.hostSelection = -1
+                tempObj.guestSelection = -1
                 roomInfo.set(roomID, tempObj)
                 io.to(roomID).emit("disconnected from room", "guest");
+                io.in(roomID).emit("room connected", "false");
             }
         } catch (error) {
             roomInfo.delete(roomID)

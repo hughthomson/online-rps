@@ -3,6 +3,27 @@ var connectionAlertElm = document.getElementById('connectionAlerts')
 
 var socket = io();
 
+socket.on("room connected", function(connected) {
+    console.log(connected)
+    if(connected == "true") {
+        enableButtons()
+        playerSelectionElm.innerHTML = spinnerHTML
+        opponentSelectionElm.innerHTML = spinnerHTML
+        playerChoice = -1;
+        opponentChoice = -1;
+        roundTextElm.style.color = "black"
+        roundTextElm.innerHTML = "Round " + round
+    } else {
+        disableButtons()
+        playerSelectionElm.innerHTML = spinnerHTML
+        opponentSelectionElm.innerHTML = spinnerHTML
+        playerChoice = -1;
+        opponentChoice = -1;
+        roundTextElm.style.color = "black"
+        roundTextElm.innerHTML = "Round " + round
+    }
+})
+
 let roomID = document.location.pathname.substring(document.location.pathname.lastIndexOf('/') + 1)
 document.getElementById('url').value = window.location.href
 document.getElementById('url').onclick = function() {
@@ -16,18 +37,50 @@ function selectText() {
 let roleGlobal = ""
 socket.emit('join room', roomID)
 
-socket.on('client role', function(role) {
-    if(role == "host") {
+socket.on('client role', function(data) {
+    console.log(data)
+    if(data.role == "host") {
         roleAlertElm.innerHTML = "<div class='alert alert-primary' role='alert'>You are the Host</div>"
 
-    } else if(role == "guest") {
+        if(data.roomInfo.guest == -1) {
+            connectionAlertElm.innerHTML = "<div class='alert alert-danger' role='alert'>Guest Not Connected</div>"
+        } else {
+            connectionAlertElm.innerHTML = "<div class='alert alert-success' role='alert'>Guest Connected</div>"
+        }
+        
+        playerWinsElm.innerHTML = "Wins: " + data.roomInfo.hostWins
+        playerWins = data.roomInfo.hostWins
+        opponentWinsElm.innerHTML = "Wins: " + data.roomInfo.guestWins
+        opponentWins = data.roomInfo.guestWins
+        round = data.roomInfo.round
+        roundTextElm.innerHTML = "Round " + data.roomInfo.round
+    } else if(data.role == "guest") {
         roleAlertElm.innerHTML = "<div class='alert alert-primary' role='alert'>You are the Guest</div>"
-        connectionAlertElm.innerHTML = "<div class='alert alert-success' role='alert'>Host Connected</div>"
-    } else if(role == "spectator") {
+        
+        if(data.roomInfo.host == -1) {
+            connectionAlertElm.innerHTML = "<div class='alert alert-danger' role='alert'>Host Not Connected</div>"
+        } else {
+            connectionAlertElm.innerHTML = "<div class='alert alert-success' role='alert'>Host Connected</div>"
+        }
+        
+        playerWinsElm.innerHTML = "Wins: " + data.roomInfo.guestWins
+        playerWins = data.roomInfo.guestWins
+        opponentWinsElm.innerHTML = "Wins: " + data.roomInfo.hostWins
+        opponentWins = data.roomInfo.hostWins
+        round = data.roomInfo.round
+        roundTextElm.innerHTML = "Round " + data.roomInfo.round
+    } else if(data.role == "spectator") {
         roleAlertElm.innerHTML = "<div class='alert alert-primary' role='alert'>You are a Spectator</div>"
+        
+        playerWinsElm.innerHTML = "Wins: " + data.roomInfo.hostWins
+        playerWins = data.roomInfo.hostWins
+        opponentWinsElm.innerHTML = "Wins: " + data.roomInfo.guestWins
+        opponentWins = data.roomInfo.guestWins
+        round = data.roomInfo.round
+        roundTextElm.innerHTML = "Round " + data.roomInfo.round
     }
-    roleGlobal = role
-    if(role == "spectator") {
+    roleGlobal = data.role
+    if(data.role == "spectator") {
         let guestCard = document.getElementById('guestCard')
         let hostCard = document.getElementById('hostCard')
 
@@ -36,13 +89,17 @@ socket.on('client role', function(role) {
     }
 })
 
-socket.on('connect to room', function(role) {
-    if(role == "host") {
+socket.on('connect to room', function(data) {
+    console.log(data)
+
+
+    if(data.role == "host") {
         connectionAlertElm.innerHTML = "<div class='alert alert-success' role='alert'>Host Connected</div>"
-    } else if(role == "guest"){
+    } else if(data.role == "guest"){
         connectionAlertElm.innerHTML = "<div class='alert alert-success' role='alert'>Guest Connected</div>"
     }
-    console.log(role + " connected")
+
+    console.log(data.role + " connected")
 })
 
 socket.on('disconnected from room', function(role) {
@@ -77,32 +134,32 @@ var playerWins = 0
 var spinnerHTML = "<div class='spinner-grow' style='width: 3rem; height: 3rem;' role='status'> </div>"
 var tempSelection = -1;
 rockButton.onclick = function() {
-    diableButtons()
+    disableButtons()
     // makeSelection(1)
     tempSelection = 1
-    playerSelectionElm.innerHTML = "<h3>Selected</h3>"
+    playerSelectionElm.innerHTML = "<h1>✔</h1>"
     socket.emit('selection made', {role: roleGlobal, selection: 1})
 }
 
 scissorsButton.onclick = function() {
-    diableButtons()
+    disableButtons()
     // makeSelection(2)
     tempSelection = 2
-    playerSelectionElm.innerHTML = "<h3>Selected</h3>"
+    playerSelectionElm.innerHTML = "<h1>✔</h1>"
     socket.emit('selection made', {role: roleGlobal, selection: 2})
 
 }
 
 paperButton.onclick = function() {
-    diableButtons()
+    disableButtons()
     // makeSelection(3)
     tempSelection = 3
-    playerSelectionElm.innerHTML = "<h3>Selected</h3>"
+    playerSelectionElm.innerHTML = "<h1>✔</h1>"
     socket.emit('selection made', {role: roleGlobal, selection: 3})
 }
 
 socket.on('selection made', function(role) {
-    opponentSelectionElm.innerHTML = "<h3>Selected</h3>"
+    opponentSelectionElm.innerHTML = "<h1>✔</h1>"
     console.log("here")
 })
 
@@ -196,7 +253,7 @@ function makeSelection(selection) {
     playerChoice = selection
 }
 
-function diableButtons() {
+function disableButtons() {
     paperButton.disabled = true;
     rockButton.disabled = true;
     scissorsButton.disabled = true;
@@ -214,10 +271,14 @@ function newRound() {
     opponentSelectionElm.innerHTML = spinnerHTML
     playerChoice = -1;
     opponentChoice = -1;
-    socket.emit('reset round')
-    round += 1
     roundTextElm.style.color = "black"
+    round += 1
     roundTextElm.innerHTML = "Round " + round
+    if(roleGlobal == "host") {
+        tempObj = {round: round, hostWins: playerWins, guestWins: opponentWins}
+        console.log(tempObj)
+        socket.emit('set round', {round: round, hostWins: playerWins, guestWins: opponentWins})
+    }
 }
 
 /* END OLD LOCAL GAME */
