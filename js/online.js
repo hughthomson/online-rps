@@ -159,7 +159,16 @@ paperButton.onclick = function() {
 }
 
 socket.on('selection made', function(role) {
-    opponentSelectionElm.innerHTML = "<h1>✔</h1>"
+    if(roleGlobal == "spectator") {
+        if(role == "host") {
+            playerSelectionElm.innerHTML = "<h1>✔</h1>"
+        } else {
+            opponentSelectionElm.innerHTML = "<h1>✔</h1>"
+        }
+    } else {
+        opponentSelectionElm.innerHTML = "<h1>✔</h1>"
+    }
+    
     console.log("here")
 })
 
